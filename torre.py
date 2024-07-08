@@ -13,3 +13,6 @@ class Torre:
 
     def __str__(self):
         return f"ID: {self.id}, Nome: {self.nome}, Endereço: {self.endereco}\n"
+
+
+#teste main
