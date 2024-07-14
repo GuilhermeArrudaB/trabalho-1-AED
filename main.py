@@ -9,17 +9,20 @@ escolha = None
 class Sistema:
     def __init__(self):
         self.fila_de_espera = FilaEspera()
-        self.vagas_disponiveis = 10
+        self.vagas_ocupadas = ListaEncadeada()
 
 
 sistema = Sistema()
-sistema.vagas_disponiveis = sistema.vagas_disponiveis - 10
 torre = Torre('B1', 'Rua Marista')
 torre2 = Torre('B2', 'Rua Catarina')
 ap1 = Apartamento(201, 1, torre)
 ap2 = Apartamento(202, 2, torre)
 ap3 = Apartamento(203, 3, torre)
 ap4 = Apartamento(101, None, torre2)
+
+sistema.vagas_ocupadas.adicionar(ap1)
+sistema.vagas_ocupadas.adicionar(ap2)
+sistema.vagas_ocupadas.adicionar(ap3)
 
 torres.append(torre)
 torre.apartamentos.append(ap1)
@@ -28,7 +31,7 @@ torre.apartamentos.append(ap3)
 
 
 while escolha != 6:
-    vagas_disponiveis = 10
+
     print('Sistema Auxiliadora Predial\n'
           '    Menu de opções:    \n'
           '1) Cadastrar apartamento\n'
@@ -50,7 +53,7 @@ while escolha != 6:
         elif escolha == 3:
             liberar_vaga(sistema)
         elif escolha == 4:
-            mostrar_vagas()
+            mostrar_vagas(sistema)
         elif escolha == 5:
             lista_espera(sistema)
         else:

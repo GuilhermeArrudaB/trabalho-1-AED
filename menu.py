@@ -1,6 +1,6 @@
 from torre import torres, Torre
 from apartamento import Apartamento
-
+from fila import FilaEspera
 
 def cadastrar_apartamento(sistema):
     if len(torres) == 0:
@@ -17,7 +17,8 @@ def cadastrar_apartamento(sistema):
             vagas = int(input('Digite o número da vaga do apartamento(1 a 10): \n'))
 
             if vagas > 10 or vagas < 0:
-                print('Digite um número de 1 a 10!')
+                print('Digite um número de 1 a 10!\n')
+                print('=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n')
                 return
 
             print('\nTorres disponíveis: ')
@@ -27,12 +28,9 @@ def cadastrar_apartamento(sistema):
             torre = next((torre for torre in torres if torre.id == escolha), None)
 
             if torre:
-                if sistema.vagas_disponiveis > 0:
+                if sistema.vagas_ocupadas.tamanho < 10:
                     apartamento = Apartamento(num, vagas)
                     apartamento.torre = torre
-
-                    sistema.vagas_disponiveis -= 1
-
                     print('\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=')
                     print('\nApartamento cadastrado:')
                     print(f'ID apartamento: {apartamento.id}\n'
@@ -41,10 +39,12 @@ def cadastrar_apartamento(sistema):
                               f'Torre:\n'
                               f'{torre}')
                     torre.apartamentos.append(apartamento)
+                    sistema.vagas_ocupadas.adicionar(apartamento)
+
                     print('=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n')
                 else:
                     apartamento = Apartamento(num, None, torre)
-                    sistema.fila_de_espera.adicionar_na_fila(apartamento)
+                    sistema.fila_de_espera.adicionar(apartamento)
                     print('\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=')
                     print('Apartamento adicionado à fila de espera: \n')
                     print(f'ID ap: {apartamento.id}\n'
@@ -63,7 +63,7 @@ def cadastrar_apartamento(sistema):
 
         except Exception as e:
             print('Digite valores validos!')
-            print(f'Código de erro: {e}\n')
+            print(f'Código de erro: {e}')
 
 
 
@@ -79,13 +79,15 @@ def cadastrar_torre():
 
 
 def liberar_vaga(sistema):
-    if sistema.vagas_disponiveis > 10:
+    if sistema.vagas_ocupadas.tamanho <= 0:
         print('\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n')
         print('Sem vagas ocupadas!')
         print('\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n')
         return
 
-    print('\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n')
+    print('\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=')
+    print('Primeiro identifique a torre!')
+    print('=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n')
     print('Lista de torres:\n')
     for torre in torres:
         print(torre)
@@ -107,25 +109,28 @@ def liberar_vaga(sistema):
     for apartamento in apartamentos_com_vaga:
         print(apartamento)
 
-    escolha = int(input('Deseja liberar a vaga de qual apartamento?\n'))
+    escolha = int(input('Digite o ID do apartamento para liberar a vaga:\n'))
     apartamento = next((apartamento for apartamento in torre.apartamentos if apartamento.id == escolha), None)
 
     if not apartamento or apartamento.vaga is None:
         print('Apartamento não encontrado ou já sem vaga!')
         return
 
-    sistema.vagas_disponiveis += 1
-    apartamento.vaga = None
+    sistema.vagas_ocupadas.tamanho -= 1
+    if sistema.fila_de_espera.inicio:
+        sistema.fila_de_espera.inicio.vaga = apartamento.vaga
+        apartamento.vaga = None
+        sistema.fila_de_espera.adicionar = apartamento
+    else:
+        apartamento.vaga = None
+
     print('Vaga liberada!\n')
     print('=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n')
 
 
-def mostrar_vagas():
-    print('Apartamentos com vagas: ')
-    for torre in torres:
-        for apartamento in torre.apartamentos:
-            if apartamento.vaga is not None and apartamento.vaga > 0:
-                print(f'{apartamento}\n')
+def mostrar_vagas(sistema):
+    print('Apartamentos com vagas: \n')
+    sistema.vagas_ocupadas.imprimir()
     print('=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n')
 
 
